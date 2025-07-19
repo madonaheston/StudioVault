@@ -16,7 +16,7 @@ const Login = () => {
                 }
             });
             localStorage.setItem('token', res.data.token);
-            window.location = '/';
+            window.location = '/dashboard';
         } catch (err) {
             setError('Invalid credentials');
         }
