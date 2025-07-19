@@ -8,22 +8,37 @@ const Dashboard = () => {
     const [file, setFile] = useState(null);
     const [error, setError] = useState('');
 
+    const fetchGalleries = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.get('http://localhost:5000/api/galleries', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            setGalleries(res.data.galleries);
+        } catch (err) {
+            setError('Error fetching galleries');
+        }
+    };
+
     useEffect(() => {
-        const fetchGalleries = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                const res = await axios.get('http://localhost:5000/api/galleries', {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-                setGalleries(res.data.galleries);
-            } catch (err) {
-                setError('Error fetching galleries');
-            }
-        };
         fetchGalleries();
     }, []);
+
+    const togglePublic = async (id, isPublic) => {
+        try {
+            const token = localStorage.getItem('token');
+            await axios.put(`http://localhost:5000/api/galleries/${id}`, { is_public: !isPublic }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            fetchGalleries();
+        } catch (err) {
+            setError('Error updating gallery');
+        }
+    };
 
     const handleGallerySubmit = async (e) => {
         e.preventDefault();
@@ -100,6 +115,14 @@ const Dashboard = () => {
             {galleries.map(gallery => (
                 <div key={gallery.id}>
                     <h3><a href={`/galleries/${gallery.id}`}>{gallery.name}</a></h3>
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={gallery.is_public}
+                            onChange={() => togglePublic(gallery.id, gallery.is_public)}
+                        />
+                        Public
+                    </label>
                 </div>
             ))}
         </div>
